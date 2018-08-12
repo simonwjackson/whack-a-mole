@@ -8,22 +8,27 @@ function rand (min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min //The maximum is inclusive and the minimum is inclusive
 }
 
-const moles = [
-  0, 0, 0,
-  0, 0, 0,
-  0, 0, 0
-]
-let score = 0
+const state = {
+  moles: [
+    0, 0, 0,
+    0, 0, 0,
+    0, 0, 0
+  ],
+  score: 0,
+  time: 0,
+  plays: 0
+}
 
+const generate = () => {}
 setInterval(() => {
-  moles.map((state, idx) => {
-    moles[idx] = rand(0, 1)
+  state.moles.map((moleState, idx) => {
+    state.moles[idx] = moleState
   })
   render()
-}, 1000)
+}, 3000)
 
 const render = () => {
-  moles.map((state, idx) => {
+  state.moles.map((state, idx) => {
     const el = document.querySelector(`.grid__item[data-placement="${idx}"]`)
 
     if (state === 1) {
@@ -35,7 +40,7 @@ const render = () => {
   })
 
   const scoreEl = document.getElementById('score')
-  scoreEl.innerHTML = `Score: ${score}`
+  scoreEl.innerHTML = `Score: ${state.score}`
 }
 
 const updateMoles = (moles, idx, state, next) => {
@@ -49,19 +54,19 @@ document.querySelector('.grid')
     if (!isClickable) return
 
     const placement = parseInt(e.target.dataset.placement)
-    const state = moles[placement]
+    const state = state.moles[placement]
     if (state === 1) {
-      score++
-      updateMoles(moles, placement, 0)
+      state.score++
+      updateMoles(state.moles, placement, 0)
     }
-    console.table(moles)
+    console.table(state.moles)
 
     e.stopPropagation()
   })
 
 
 const draw = grid => {
-  moles.map((el, idx) => {
+  state.moles.map((el, idx) => {
     const img = document.createElement('img')
     img.classList.add('img-responsive')
     img.setAttribute('src', mole )
