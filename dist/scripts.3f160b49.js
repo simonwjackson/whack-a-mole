@@ -182,33 +182,59 @@ var _mole2 = _interopRequireDefault(_mole);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var moles = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+function rand(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
 
-// document
-//   .querySelectorAll('.grid__item')
-//   .forEach((node, idx) => {
-//     node.dataset.placement = idx
-//   })
+  return Math.floor(Math.random() * (max - min + 1)) + min; //The maximum is inclusive and the minimum is inclusive
+}
+
+var moles = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+var score = 0;
+
+setInterval(function () {
+  moles.map(function (state, idx) {
+    moles[idx] = rand(0, 1);
+  });
+  render();
+}, 1000);
+
+var render = function render() {
+  moles.map(function (state, idx) {
+    var el = document.querySelector('.grid__item[data-placement="' + idx + '"]');
+
+    if (state === 1) {
+      el.classList.add('is-active');
+    } else {
+      el.classList.remove('is-active');
+    }
+  });
+
+  var scoreEl = document.getElementById('score');
+  scoreEl.innerHTML = 'Score: ' + score;
+};
 
 var updateMoles = function updateMoles(moles, idx, state, next) {
   moles[idx] = state;
+  render();
 };
 
 document.querySelector('.grid').addEventListener('mousedown', function (e) {
   var isClickable = e.target.classList.contains('grid__item');
   if (!isClickable) return;
+
   var placement = parseInt(e.target.dataset.placement);
-  var state = moles[placement] === 1 ? 0 : 1;
-  updateMoles(moles, placement, state);
+  var state = moles[placement];
+  if (state === 1) {
+    score++;
+    updateMoles(moles, placement, 0);
+  }
   console.table(moles);
 
   e.stopPropagation();
 });
 
-var grid = document.querySelector('.grid');
-grid.innerHTML = '';
-
-var draw = function draw() {
+var draw = function draw(grid) {
   moles.map(function (el, idx) {
     var img = document.createElement('img');
     img.classList.add('img-responsive');
@@ -223,7 +249,13 @@ var draw = function draw() {
   });
 };
 
-draw();
+var main = function main() {
+  var grid = document.querySelector('.grid');
+  grid.innerHTML = '';
+  draw(grid);
+};
+
+main();
 },{"../styles/main.css":"src\\styles\\main.css","../images/mole.png":"src\\images\\mole.png"}],"node_modules\\parcel-bundler\\src\\builtins\\hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
