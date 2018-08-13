@@ -189,21 +189,33 @@ function rand(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min; //The maximum is inclusive and the minimum is inclusive
 }
 
-var moles = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-var score = 0;
+var state = {
+  moles: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  score: 0,
+  time: 0,
+  plays: 0,
+  loop: 3000,
+  min: 1000
 
-setInterval(function () {
-  moles.map(function (state, idx) {
-    moles[idx] = rand(0, 1);
+  // const generate = () => {}
+};setInterval(function () {
+  state.moles.map(function (moleState, idx) {
+    var newMoleState = rand(0, 1);
+    updateMole(state.moles, idx, newMoleState);
+    if (newMoleState === 1) {
+      setTimeout(function () {
+        updateMole(state.moles, idx, 0);
+      }, rand(state.min, state.loop));
+    }
   });
   render();
-}, 1000);
+}, state.loop);
 
 var render = function render() {
-  moles.map(function (state, idx) {
+  state.moles.map(function (moleState, idx) {
     var el = document.querySelector('.grid__item[data-placement="' + idx + '"]');
 
-    if (state === 1) {
+    if (moleState === 1) {
       el.classList.add('is-active');
     } else {
       el.classList.remove('is-active');
@@ -211,10 +223,10 @@ var render = function render() {
   });
 
   var scoreEl = document.getElementById('score');
-  scoreEl.innerHTML = 'Score: ' + score;
+  scoreEl.innerHTML = 'Score: ' + state.score;
 };
 
-var updateMoles = function updateMoles(moles, idx, state, next) {
+var updateMole = function updateMole(moles, idx, state, next) {
   moles[idx] = state;
   render();
 };
@@ -224,18 +236,17 @@ document.querySelector('.grid').addEventListener('mousedown', function (e) {
   if (!isClickable) return;
 
   var placement = parseInt(e.target.dataset.placement);
-  var state = moles[placement];
-  if (state === 1) {
-    score++;
-    updateMoles(moles, placement, 0);
+  var moleState = state.moles[placement];
+  if (moleState === 1) {
+    state.score++;
+    updateMole(state.moles, placement, 0);
   }
-  console.table(moles);
 
   e.stopPropagation();
 });
 
 var draw = function draw(grid) {
-  moles.map(function (el, idx) {
+  state.moles.map(function (el, idx) {
     var img = document.createElement('img');
     img.classList.add('img-responsive');
     img.setAttribute('src', _mole2.default);
@@ -285,7 +296,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = '' || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + '59884' + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + '54664' + '/');
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
 
