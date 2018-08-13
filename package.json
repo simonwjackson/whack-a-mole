@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "serve": "parcel index.html",
-    "build": "parcel build index.html",
-    "push": "push-dir --dir=dist --branch=gh-pages"
+    "publish:gh-pages": "npm run build:gh-pages && npm run push:gh-pages",
+    "build:gh-pages": "parcel build index.html --public-url ./",
+    "push:gh-pages": "push-dir --dir=dist --branch=gh-pages"
   },
   "keywords": [],
   "author": "",
