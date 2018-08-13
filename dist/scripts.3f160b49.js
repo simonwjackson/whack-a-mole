@@ -164,13 +164,126 @@ function reloadCSS() {
 }
 
 module.exports = reloadCSS;
-},{"./bundle-url":"node_modules\\parcel-bundler\\src\\builtins\\bundle-url.js"}],"src\\styles\\main.css":[function(require,module,exports) {
+},{"./bundle-url":"node_modules\\parcel-bundler\\src\\builtins\\bundle-url.js"}],"src\\styles\\button.css":[function(require,module,exports) {
 
 var reloadCSS = require('_css_loader');
 module.hot.dispose(reloadCSS);
 module.hot.accept(reloadCSS);
-},{"_css_loader":"node_modules\\parcel-bundler\\src\\builtins\\css-loader.js"}],"src\\images\\mole.png":[function(require,module,exports) {
+},{"_css_loader":"node_modules\\parcel-bundler\\src\\builtins\\css-loader.js"}],"src\\styles\\main.css":[function(require,module,exports) {
+
+var reloadCSS = require('_css_loader');
+module.hot.dispose(reloadCSS);
+module.hot.accept(reloadCSS);
+},{"./button.css":"src\\styles\\button.css","./..\\images\\grass.png":[["grass.6e0c3df2.png","src\\images\\grass.png"],"src\\images\\grass.png"],"_css_loader":"node_modules\\parcel-bundler\\src\\builtins\\css-loader.js"}],"src\\images\\mole.png":[function(require,module,exports) {
 module.exports = "/mole.5cbe5579.png";
+},{}],"src\\scripts\\utils.js":[function(require,module,exports) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var curry = function curry(fn) {
+  return function () {
+    for (var _len = arguments.length, xs = Array(_len), _key = 0; _key < _len; _key++) {
+      xs[_key] = arguments[_key];
+    }
+
+    if (xs.length === 0) {
+      throw Error('EMPTY INVOCATION');
+    }
+    if (xs.length >= fn.length) {
+      return fn.apply(undefined, xs);
+    }
+    return curry(fn.bind.apply(fn, [null].concat(xs)));
+  };
+};
+var pipe = exports.pipe = function pipe() {
+  for (var _len2 = arguments.length, ops = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+    ops[_key2] = arguments[_key2];
+  }
+
+  return ops.reduce(function (a, b) {
+    return function (arg) {
+      return b(a(arg));
+    };
+  });
+};
+var rand = exports.rand = function rand(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+
+  return Math.floor(Math.random() * (max - min + 1)) + min; //The maximum is inclusive and the minimum is inclusive
+};
+var $ = exports.$ = function $(query) {
+  return document.querySelector(query);
+};
+var $$ = exports.$$ = function $$(query) {
+  return document.querySelectorAll(query);
+};
+var html = exports.html = curry(function (el, data) {
+  el.innerHTML = data;
+  return el;
+});
+var getById = exports.getById = function getById(query) {
+  return document.getElementById(query);
+};
+var createEl = exports.createEl = curry(function (tag, content, classes, id) {
+  var el = document.createElement(tag);
+  html(el, content);
+  classes.map(function (cl) {
+    return el.classList.add(cl);
+  });
+  if (id) el.id = id;
+  return el;
+});
+var append = exports.append = curry(function (to, el) {
+  to.appendChild(el);
+  return el;
+});
+var prepend = exports.prepend = curry(function (to, el) {
+  to.prepend(el);
+  return el;
+});
+var unload = exports.unload = function unload(el) {
+  return html(el, '');
+};
+var addEvent = exports.addEvent = curry(function (name, fn, el) {
+  el.addEventListener(name, fn);
+  return el;
+});
+var getByPlacement = exports.getByPlacement = function getByPlacement(num) {
+  return $('.grid__item[data-placement="' + num + '"]');
+};
+var between = exports.between = curry(function (min, max, num) {
+  return num >= min && num <= max;
+});
+var when = exports.when = curry(function (pred, whenTrueFn, x) {
+  return pred(x) ? whenTrueFn(x) : x;
+});
+var subtract = exports.subtract = curry(function (a, b) {
+  return b - a;
+});
+},{}],"src\\scripts\\state.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = {
+  moles: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  score: 0,
+  plays: 0,
+  time: 0,
+  settings: {
+    timing: {
+      timer: 30000,
+      max: 2000,
+      min: 1000
+    }
+  },
+  gameTimer: null,
+  gameLoop: null
+};
 },{}],"src\\scripts\\index.js":[function(require,module,exports) {
 'use strict';
 
@@ -180,36 +293,147 @@ var _mole = require('../images/mole.png');
 
 var _mole2 = _interopRequireDefault(_mole);
 
+var _utils = require('./utils');
+
+var _state = require('./state');
+
+var _state2 = _interopRequireDefault(_state);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var moles = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+var render = function render() {
+  _state2.default.moles.map(function (moleState, idx) {
+    var el = (0, _utils.getByPlacement)(idx);
+    if (moleState === 1) el.classList.add('is-active');else el.classList.remove('is-active');
+  });
 
-// document
-//   .querySelectorAll('.grid__item')
-//   .forEach((node, idx) => {
-//     node.dataset.placement = idx
-//   })
-
-var updateMoles = function updateMoles(moles, idx, state, next) {
-  moles[idx] = state;
+  (0, _utils.html)((0, _utils.getById)('score'), 'Score: ' + _state2.default.score);
+  (0, _utils.html)((0, _utils.getById)('time'), 'Time: ' + _state2.default.time / 1000);
 };
 
-document.querySelector('.grid').addEventListener('mousedown', function (e) {
-  var isClickable = e.target.classList.contains('grid__item');
+var updateMole = function updateMole(moles, idx, state) {
+  moles[idx] = state;
+  render();
+};
+
+var gameLoop = function gameLoop() {
+  _state2.default.moles.map(function (moleState, idx) {
+    var newMoleState = (0, _utils.rand)(0, 1);
+    updateMole(_state2.default.moles, idx, newMoleState);
+
+    if (newMoleState === 1) {
+      setTimeout(function () {
+        updateMole(_state2.default.moles, idx, 0);
+      }, (0, _utils.rand)(_state2.default.settings.timing.min, _state2.default.settings.timing.max));
+    }
+  });
+
+  render();
+};
+
+var start = function start() {
+  var interval = 1000;
+
+  gameLoop();
+  _state2.default.gameTimer = setInterval(function () {
+    if (_state2.default.time <= interval) {
+      _state2.default.moles = _state2.default.moles.map(function () {
+        return 0;
+      });
+      _state2.default.time = 0;
+      clearInterval(_state2.default.gameTimer);
+    } else {
+      _state2.default.time -= interval;
+    }
+    render();
+  }, interval);
+
+  _state2.default.gameInterval = setInterval(function () {
+    if (_state2.default.time <= 0) {
+      clearInterval(_state2.default.gameInterval);
+      return;
+    }
+
+    gameLoop();
+  }, _state2.default.settings.timing.max);
+};
+
+var stop = function stop() {
+  clearInterval(_state2.default.gameTimer);
+  clearInterval(_state2.default.gameInterval);
+  render();
+};
+
+var reset = function reset() {
+  stop();
+  _state2.default.time = _state2.default.settings.timing.timer;
+  _state2.default.score = 0;
+  render();
+};
+
+var createButtons = function createButtons() {
+  var app = (0, _utils.$)('.top');
+
+  var resetBtn = (0, _utils.createEl)('button', 'Reset', ['button', 'button--reset'], 'reset');
+  (0, _utils.addEvent)('click', reset, resetBtn);
+  (0, _utils.prepend)(app, resetBtn);
+
+  var stopBtn = (0, _utils.createEl)('button', 'Stop', ['button', 'button--stop'], 'stop');
+  (0, _utils.addEvent)('click', stop, stopBtn);
+  (0, _utils.prepend)(app, stopBtn);
+
+  var startBtn = (0, _utils.createEl)('button', 'Start', ['button'], 'start');
+  (0, _utils.addEvent)('click', start, startBtn);
+  (0, _utils.prepend)(app, startBtn);
+};
+
+var whack = function whack(el) {
+  var isClickable = el.classList.contains('grid__item');
   if (!isClickable) return;
-  var placement = parseInt(e.target.dataset.placement);
-  var state = moles[placement] === 1 ? 0 : 1;
-  updateMoles(moles, placement, state);
-  console.table(moles);
 
-  e.stopPropagation();
-});
+  var placement = parseInt(el.dataset.placement);
+  var moleState = _state2.default.moles[placement];
 
-var grid = document.querySelector('.grid');
-grid.innerHTML = '';
+  if (moleState === 1) {
+    var sfx = (0, _utils.$)('#whack');
+    sfx.currentTime = 0;
+    sfx.play();
+    _state2.default.score++;
+    updateMole(_state2.default.moles, placement, 0);
+  }
+};
 
-var draw = function draw() {
-  moles.map(function (el, idx) {
+var setupEvents = function setupEvents() {
+  (0, _utils.$)('.grid').addEventListener('mousedown', function (e) {
+    whack(e.target);
+    e.stopPropagation();
+  });
+};
+
+var numPadToGridPlacement = function numPadToGridPlacement(num) {
+  if (num <= 3) return num + 6;else if (num > 6) return num - 6;
+  return num;
+};
+
+var numpadInput = function numpadInput() {
+  var numWhack = (0, _utils.pipe)(parseInt, numPadToGridPlacement, (0, _utils.subtract)(1), _utils.getByPlacement, whack);
+  var tryWhack = (0, _utils.when)((0, _utils.between)(1, 9), numWhack);
+  document.addEventListener('keypress', function (e) {
+    return tryWhack(e.key);
+  });
+};
+
+var init = function init() {
+  createButtons();
+  setupEvents();
+  numpadInput();
+
+  var grid = (0, _utils.$)('.grid');
+  (0, _utils.unload)(grid);
+
+  _state2.default.time = _state2.default.settings.timing.timer;
+
+  _state2.default.moles.map(function (el, idx) {
     var img = document.createElement('img');
     img.classList.add('img-responsive');
     img.setAttribute('src', _mole2.default);
@@ -221,10 +445,12 @@ var draw = function draw() {
 
     grid.appendChild(item);
   });
+
+  render();
 };
 
-draw();
-},{"../styles/main.css":"src\\styles\\main.css","../images/mole.png":"src\\images\\mole.png"}],"node_modules\\parcel-bundler\\src\\builtins\\hmr-runtime.js":[function(require,module,exports) {
+(0, _utils.addEvent)('DOMContentLoaded', init, document);
+},{"../styles/main.css":"src\\styles\\main.css","../images/mole.png":"src\\images\\mole.png","./utils":"src\\scripts\\utils.js","./state":"src\\scripts\\state.js"}],"node_modules\\parcel-bundler\\src\\builtins\\hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 
@@ -253,7 +479,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = '' || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + '59884' + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + '51621' + '/');
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
 
