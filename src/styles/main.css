@@ -1,13 +1,28 @@
+@import url('./button.css');
+
+* {
+  box-sizing: border-box;
+}
+
 html,
 body {
   padding: 0;
   margin: 0;
-  background-color: black;
+  background-color: green;
+  background-image: url('../images/grass.png');
   user-select: none;
   color: white;
 }
 
+.app {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  font-family: 'Press Start 2P', cursive; 
+}
+
 .grid {
+  padding: 3rem;
   display: grid;
   grid-template-columns: repeat(3, 3fr);
   grid-gap: 0;
@@ -18,6 +33,7 @@ body {
 .grid__item {
   align-self: center;
   justify-self: center;
+  height: 33vh;
 }
 
 .grid__item * {
@@ -27,11 +43,49 @@ body {
 .img-responsive {
   object-fit: contain;
   width: 100%;
-  height: 33vh; /* Hack */
-  visibility: hidden;
+  height: 0vh;
+  transition: all .25s ease;
+  transition-property: height, opacity;
+  opacity: 0;
+  cursor: pointer;
 }
 
 .is-active .img-responsive {
-  visibility: visible;
+  height: 23vh; /* Hack */
+  opacity: 1;
 }
-/**/
+
+.top {
+  padding: 1rem;
+  background: #333;
+  box-shadow: inset -10px 10px 10px rgba(0, 0, 0, .15);
+}
+
+.top .button {
+  width: 100%;
+  margin-bottom: 1rem;
+  cursor: pointer;
+}
+
+.score {
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 720px) {
+  .app {
+    flex-direction: column; 
+  }  
+
+  .grid {
+    height: 100%;
+  }
+
+  .grid__item {
+    height: 100%;
+  }
+
+  .is-active .img-responsive,
+  .img-responsive {
+    height: auto;
+  }
+}
