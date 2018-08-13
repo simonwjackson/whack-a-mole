@@ -22,7 +22,6 @@ body {
 }
 
 .grid {
-  padding: 3rem;
   display: grid;
   grid-template-columns: repeat(3, 3fr);
   grid-gap: 0;
