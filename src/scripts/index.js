@@ -1,17 +1,30 @@
 import '../styles/main.css'
 import mole from '../images/mole.png'
-import { rand, $, byId, html } from './utils'
+import {
+  rand,
+  $,
+  getById,
+  html,
+  unload,
+  createEl,
+  prepend,
+  pipe,
+  addEvent,
+  getByPlacement,
+  when,
+  between,
+  subtract } from './utils'
 import state from './state'
 
 const render = () => {
   state.moles.map((moleState, idx) => {
-    const el = $(`.grid__item[data-placement="${idx}"]`)
+    const el = getByPlacement(idx)
     if (moleState === 1) el.classList.add('is-active')
     else el.classList.remove('is-active')
   })
 
-  html(byId('score'), `Score: ${state.score}`)
-  html(byId('time'), `Time: ${state.time / 1000}`)
+  html(getById('score'), `Score: ${state.score}`)
+  html(getById('time'), `Time: ${state.time / 1000}`)
 }
 
 const updateMole = (moles, idx, state) => {
@@ -61,7 +74,7 @@ const start = () => {
 
 const stop = () => {
   clearInterval(state.gameTimer)
-  clearInterval(state.gameInterval) 
+  clearInterval(state.gameInterval)
   render()
 }
 
@@ -73,42 +86,72 @@ const reset = () => {
 }
 
 const createButtons = () => {
-  byId('start').addEventListener('click', start)
-  byId('stop').addEventListener('click', stop)
-  byId('reset').addEventListener('click', reset) 
+  const app = $('.top')
+
+  const resetBtn = createEl('button', 'Reset', ['button', 'button--reset'], 'reset')
+  addEvent('click', reset, resetBtn)
+  prepend(app, resetBtn)
+
+  const stopBtn = createEl('button', 'Stop', ['button', 'button--stop'], 'stop')
+  addEvent('click', stop, stopBtn)
+  prepend(app, stopBtn)
+
+  const startBtn = createEl('button', 'Start', ['button'], 'start')
+  addEvent('click', start, startBtn)
+  prepend(app, startBtn)
+}
+
+const whack = el => {
+  const isClickable = el.classList.contains('grid__item')
+  if (!isClickable) return
+
+  const placement = parseInt(el.dataset.placement)
+  const moleState = state.moles[placement]
+
+  if (moleState === 1) {
+    const sfx = $('#whack')
+    sfx.currentTime = 0 
+    sfx.play()
+    state.score++
+    updateMole(state.moles, placement, 0)
+  }
 }
 
 const setupEvents = () => {
   $('.grid')
     .addEventListener('mousedown', e => {
-      const isClickable = e.target.classList.contains('grid__item')
-      if (!isClickable) return
-
-      const placement = parseInt(e.target.dataset.placement)
-      const moleState = state.moles[placement]
-      if (moleState === 1) {
-        state.score++
-        updateMole(state.moles, placement, 0)
-      }
-
+      whack(e.target)
       e.stopPropagation()
     })
+}
+
+const numPadToGridPlacement = num => {
+  if (num <= 3) return num + 6
+  else if (num > 6) return num - 6
+  return num
+}
+
+const numpadInput = () => {
+  const numWhack = pipe(parseInt, numPadToGridPlacement, subtract(1), getByPlacement, whack)
+  const tryWhack = when(between(1, 9), numWhack)
+  document.addEventListener('keypress', e => tryWhack(e.key))
 }
 
 const init = () => {
   createButtons()
   setupEvents()
+  numpadInput()
 
   const grid = $('.grid')
-  html(grid, '')
+  unload(grid)
 
   state.time = state.settings.timing.timer
 
   state.moles.map((el, idx) => {
     const img = document.createElement('img')
-    img.classList.add('img-responsive')
+    img.classList.add('img-responsive') 
     img.setAttribute('src', mole)
-
+    
     const item = document.createElement('div')
     item.classList.add('grid__item')
     item.dataset.placement = idx
@@ -116,6 +159,8 @@ const init = () => {
 
     grid.appendChild(item)
   })
+
+  render()
 }
 
-document.addEventListener('DOMContentLoaded', init)
+addEvent('DOMContentLoaded', init, document)
