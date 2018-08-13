@@ -6,7 +6,7 @@
   "scripts": {
     "serve": "parcel index.html",
     "publish:gh-pages": "npm run build:gh-pages && npm run push:gh-pages",
-    "build:gh-pages": "parcel build index.html --public-url ./whack-a-mole",
+    "build:gh-pages": "parcel build index.html --public-url ./whack-a-mole/",
     "push:gh-pages": "push-dir --dir=dist --branch=gh-pages"
   },
   "keywords": [],
