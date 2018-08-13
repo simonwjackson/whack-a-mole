@@ -16,22 +16,30 @@ const state = {
   ],
   score: 0,
   time: 0,
-  plays: 0
+  plays: 0,
+  loop: 3000,
+  min: 1000
 }
 
-const generate = () => {}
+// const generate = () => {}
 setInterval(() => {
   state.moles.map((moleState, idx) => {
-    state.moles[idx] = moleState
+    const newMoleState = rand(0, 1)
+    updateMole(state.moles, idx, newMoleState)
+    if (newMoleState === 1) {
+      setTimeout(() => {
+        updateMole(state.moles, idx, 0)
+      }, rand(state.min, state.loop))
+    }
   })
   render()
-}, 3000)
+}, state.loop)
 
 const render = () => {
-  state.moles.map((state, idx) => {
+  state.moles.map((moleState, idx) => {
     const el = document.querySelector(`.grid__item[data-placement="${idx}"]`)
 
-    if (state === 1) {
+    if (moleState === 1) {
       el.classList.add('is-active')
     }
     else {
@@ -43,7 +51,7 @@ const render = () => {
   scoreEl.innerHTML = `Score: ${state.score}`
 }
 
-const updateMoles = (moles, idx, state, next) => {
+const updateMole = (moles, idx, state, next) => {
   moles[idx] = state
   render()
 }
@@ -54,12 +62,11 @@ document.querySelector('.grid')
     if (!isClickable) return
 
     const placement = parseInt(e.target.dataset.placement)
-    const state = state.moles[placement]
-    if (state === 1) {
+    const moleState = state.moles[placement]
+    if (moleState === 1) {
       state.score++
-      updateMoles(state.moles, placement, 0)
+      updateMole(state.moles, placement, 0)
     }
-    console.table(state.moles)
 
     e.stopPropagation()
   })
