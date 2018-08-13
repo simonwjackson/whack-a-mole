@@ -2,11 +2,6 @@
 
 Whack-a-Mole game in Vanilla JS
 
-## Features
-- 8-bit ui
-- Sound effects
-- gameplay using Numpad
-
 ![screenshot](https://user-images.githubusercontent.com/189379/44050585-fa837a68-9efc-11e8-85df-43b281f44636.PNG)
 
 ## Install
@@ -16,6 +11,10 @@ Whack-a-Mole game in Vanilla JS
 * `npm run serve`
 * go to http://localhost:1234
 
+## Features
+- 8-bit ui
+- Sound effects
+- gameplay using Numpad
 
 ### Todo (core):
 - remove dependency on UI layer when whacking mole (see keypad function)
